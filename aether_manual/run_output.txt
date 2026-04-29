@@ -1,0 +1,128 @@
+========================================================================================
+ AETHER CRYSTAL manual options pricer  --  IMC Prosperity Round 4
+========================================================================================
+ S0=50.0  sigma=2.51  dt=1/(4*252)=0.000992  contract_size=3000
+ Simulating 200,000 GBM paths over 60 steps (T+21 = 3wk = 15 trading days).
+ Mid-life check at step 40 (T+14 = 2wk = 10 trading days, for chooser/T+14 vanillas).
+ Score-noise = std of mean across 1,000 resamples of 100 paths.
+
+ BLACK-SCHOLES sanity checks (r=0):
+   T+21 = 3wk = 15 trading days = 60 steps; sigma*sqrt(T)=0.6124
+   T+14 = 2wk = 10 trading days = 40 steps; sigma*sqrt(T)=0.5000
+   ATM call 21d  BS=12.0269  MC=11.9412
+   ATM put  21d  BS=12.0269  MC=12.0364
+   ATM call 14d  BS= 9.8707  MC= 9.7761
+   ATM put  14d  BS= 9.8707  MC= 9.8603
+   E[S_21]  BS=50.0000  MC=49.9048    (martingale test)
+   E[S_14]  BS=50.0000  MC=49.9158
+   P(S_21 < 35)  BS= 0.3912  MC= 0.3918
+   P(min path < 35) MC= 0.6142  (knock-out probability)
+
+ PER-CONTRACT PRICING
+ ----------------------------------------------------------------------------------------------------------------------------------
+ Contract    Kind            Bid     Ask      Fair    sdPay    MC SE   ScoreSD      Edge   Act  Vol          EV ($)
+ ----------------------------------------------------------------------------------------------------------------------------------
+ AC          underlying   49.975  50.025   49.9048   33.632   0.0752    3.3989   +0.0702  SKIP    0              +0
+ AC_50_P     put 21d      12.000  12.050   12.0364   12.602   0.0282    1.2691   -0.0136  SKIP    0              -0
+ AC_50_C     call 21d     12.000  12.050   11.9412   26.170   0.0585    2.6944   +0.0588  SELL   50          +8,823
+ AC_35_P     put 21d       4.330   4.350    4.3317    6.928   0.0155    0.6940   -0.0017  SKIP    0              -0
+ AC_40_P     put 21d       6.500   6.550    6.5091    8.846   0.0198    0.8989   -0.0091  SKIP    0              -0
+ AC_45_P     put 21d       9.050   9.100    9.0932   10.753   0.0240    1.0708   -0.0068  SKIP    0              -0
+ AC_60_C     call 21d      8.800   8.850    8.7140   23.383   0.0523    2.3477   +0.0860  SELL   50         +12,904
+ AC_50_P_2   put 14d       9.700   9.750    9.8603   10.961   0.0245    1.1174   +0.1103   BUY   50         +16,549
+ AC_50_C_2   call 14d      9.700   9.750    9.7761   19.755   0.0442    1.9130   +0.0261   BUY   50          +3,922
+ AC_50_CO    chooser      22.200  22.300   21.8132   24.725   0.0553    2.4294   +0.3868  SELL   50         +58,016
+ AC_40_BP    binary put    5.000   5.100    4.7787    4.995   0.0112    0.4821   +0.2213  SELL   50         +33,188
+ AC_45_KO    KO put 35     0.150   0.175    0.2084    1.091   0.0024    0.1025   +0.0334   BUY  500         +50,042
+
+========================================================================================
+ RECOMMENDED ORDER TICKET
+========================================================================================
+   SELL   50 x AC_50_C     @  12.000    fair=  11.941  edge= +0.0588/unit   EV = $       +8,823
+   SELL   50 x AC_60_C     @   8.800    fair=   8.714  edge= +0.0860/unit   EV = $      +12,904
+   BUY    50 x AC_50_P_2   @   9.750    fair=   9.860  edge= +0.1103/unit   EV = $      +16,549
+   BUY    50 x AC_50_C_2   @   9.750    fair=   9.776  edge= +0.0261/unit   EV = $       +3,922
+   SELL   50 x AC_50_CO    @  22.200    fair=  21.813  edge= +0.3868/unit   EV = $      +58,016
+   SELL   50 x AC_40_BP    @   5.000    fair=   4.779  edge= +0.2213/unit   EV = $      +33,188
+   BUY   500 x AC_45_KO    @   0.175    fair=   0.208  edge= +0.0334/unit   EV = $      +50,042
+----------------------------------------------------------------------------------------
+   TOTAL EXPECTED PNL:  $       +183,443
+
+ JOINT PNL DISTRIBUTION (true model -- before scoring noise)
+ ----------------------------------------------------------------------
+   mean    = $       +183,443    (matches sum of EVs above)
+   std     = $     +9,380,038
+   min     = $   -202,073,741
+   max     = $    +27,082,269
+   p01     = $    -39,245,492
+   p05     = $    -17,071,434
+   p10     = $     -8,126,496
+   p25     = $       +291,124
+   p50     = $     +2,114,569
+   p75     = $     +4,040,033
+   p90     = $     +5,954,434
+   p95     = $     +7,870,928
+   p99     = $    +14,035,378
+
+ WORST-CASE / BEST-CASE PNL  (at the recommended sizes)
+ ----------------------------------------------------------------------
+   1%-tail loss:   $    -39,245,492
+   5%-tail loss:   $    -17,071,434
+   95%-tail gain:  $     +7,870,928
+   99%-tail gain:  $    +14,035,378
+   P(total PnL < 0) = 0.228
+
+ RISK WARNINGS
+ ----------------------------------------------------------------------
+   [AC]  sd_payoff=33.63 > 30% of mean (49.90)
+   [AC]  score_std=3.399 > edge (0.070) -- 100-sim noise dominates
+   [AC]  MC SE=0.0752 not <<edge -- MC fair value uncertain
+   [AC_50_P]  sd_payoff=12.60 > 30% of mean (12.04)
+   [AC_50_C]  sd_payoff=26.17 > 30% of mean (11.94)
+   [AC_50_C]  score_std=2.694 > edge (0.059) -- 100-sim noise dominates
+   [AC_50_C]  MC SE=0.0585 not <<edge -- MC fair value uncertain
+   [AC_35_P]  sd_payoff=6.93 > 30% of mean (4.33)
+   [AC_40_P]  sd_payoff=8.85 > 30% of mean (6.51)
+   [AC_45_P]  sd_payoff=10.75 > 30% of mean (9.09)
+   [AC_60_C]  sd_payoff=23.38 > 30% of mean (8.71)
+   [AC_60_C]  score_std=2.348 > edge (0.086) -- 100-sim noise dominates
+   [AC_60_C]  MC SE=0.0523 not <<edge -- MC fair value uncertain
+   [AC_50_P_2]  sd_payoff=10.96 > 30% of mean (9.86)
+   [AC_50_P_2]  score_std=1.117 > edge (0.110) -- 100-sim noise dominates
+   [AC_50_C_2]  sd_payoff=19.76 > 30% of mean (9.78)
+   [AC_50_C_2]  score_std=1.913 > edge (0.026) -- 100-sim noise dominates
+   [AC_50_C_2]  MC SE=0.0442 not <<edge -- MC fair value uncertain
+   [AC_50_CO]  sd_payoff=24.72 > 30% of mean (21.81)
+   [AC_50_CO]  score_std=2.429 > edge (0.387) -- 100-sim noise dominates
+   [AC_40_BP]  sd_payoff=5.00 > 30% of mean (4.78)
+   [AC_40_BP]  score_std=0.482 > edge (0.221) -- 100-sim noise dominates
+   [AC_45_KO]  sd_payoff=1.09 > 30% of mean (0.21)
+   [AC_45_KO]  score_std=0.102 > edge (0.033) -- 100-sim noise dominates
+
+ 100-SIM SCORE-NOISE IMPACT ON ORDER-TICKET PNL
+ ----------------------------------------------------------------------
+   mean realised PnL across 1000 N=100 trials: $     +154,597
+   std  realised PnL across 1000 N=100 trials: $     +911,613
+   5%-tail realised PnL: $   -1,370,127
+   95%-tail realised PnL: $   +1,573,638
+   P(score PnL < 0): 0.413
+
+
+========================================================================================
+ CONSERVATIVE TICKET  --  only trades where edge >= 30% of score-sd
+========================================================================================
+   SELL   50 x AC_40_BP    @   5.000    fair=   4.779  edge= +0.2213/unit  scoreSD=0.482  EV = $      +33,188
+   BUY   500 x AC_45_KO    @   0.175    fair=   0.208  edge= +0.0334/unit  scoreSD=0.102  EV = $      +50,042
+----------------------------------------------------------------------------------------
+   TOTAL CONSERVATIVE EV:  $        +83,229
+
+   conservative-ticket bootstrap (N=100 score sims):
+     mean realised PnL: $      +86,919
+     std  realised PnL: $     +172,273
+     5%-tail:           $     -171,829
+     95%-tail:          $     +372,456
+     P(score PnL < 0):  0.307
+
+========================================================================================
+ END OF REPORT
+========================================================================================

@@ -1,0 +1,60 @@
+[package]
+name = "rust_backtester"
+version = "0.5.0"
+edition = "2024"
+description = "Standalone Rust IMC Prosperity backtester"
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/GeyzsoN/prosperity_rust_backtester"
+homepage = "https://github.com/GeyzsoN/prosperity_rust_backtester"
+keywords = ["imc", "backtester", "trading", "rust"]
+categories = ["command-line-utilities", "simulation"]
+include = [
+    "Cargo.toml",
+    "Cargo.lock",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE-APACHE",
+    "LICENSE-MIT",
+    "src/cli.rs",
+    "src/jsonfmt.rs",
+    "src/lib.rs",
+    "src/main.rs",
+    "src/model.rs",
+    "src/pytrader.rs",
+    "src/runner.rs",
+    "traders/*.py",
+    "traders/**/*.py",
+    "datasets/tutorial/.gitkeep",
+    "datasets/tutorial/prices_round_0_day_*.csv",
+    "datasets/tutorial/trades_round_0_day_*.csv",
+    "datasets/tutorial/submission.log",
+    "datasets/tutorial/submission.json",
+    "datasets/round1/.gitkeep",
+    "datasets/round1/prices_round_1_day_*.csv",
+    "datasets/round1/trades_round_1_day_*.csv",
+    "datasets/round2/.gitkeep",
+    "datasets/round2/prices_round_2_day_*.csv",
+    "datasets/round2/trades_round_2_day_*.csv",
+    "datasets/round3/.gitkeep",
+    "datasets/round3/prices_round_3_day_*.csv",
+    "datasets/round3/trades_round_3_day_*.csv",
+    "datasets/round4/.gitkeep",
+    "datasets/round4/prices_round_4_day_*.csv",
+    "datasets/round4/trades_round_4_day_*.csv",
+]
+
+[dependencies]
+anyhow = "1.0"
+clap = { version = "4.5", features = ["derive"] }
+indexmap = { version = "2.12", features = ["serde"] }
+pyo3 = { version = "0.27", features = ["auto-initialize"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = { version = "1.0", features = ["preserve_order"] }
+time = { version = "0.3", features = ["formatting"] }
+
+[profile.release]
+lto = false
+codegen-units = 8
+panic = "abort"
+strip = "none"
