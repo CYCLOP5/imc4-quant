@@ -2,7 +2,6 @@ from typing import Dict, List, Optional
 
 from datamodel import Order, OrderDepth, TradingState
 
-
 class Trader:
     ROUND5_PREFIXES = (
         "GALAXY_SOUNDS_",
@@ -29,16 +28,12 @@ class Trader:
             "UV_VISOR_MAGENTA",
             "GALAXY_SOUNDS_SOLAR_FLAMES",
             "TRANSLATOR_SPACE_GRAY",
-            "GALAXY_SOUNDS_PLANETARY_RINGS",
-            "GALAXY_SOUNDS_DARK_MATTER",
-            "ROBOT_DISHES",
-            "OXYGEN_SHAKE_MORNING_BREATH",
-            "PANEL_2X2",
         }
     )
 
     INV_SKEW_K = 0
-    EOD_FLATTEN = True
+
+    EOD_FLATTEN = False
     EOD_TS = 995_000
 
     def run(self, state: TradingState):

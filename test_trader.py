@@ -6,9 +6,10 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from datamodel import Listing, Observation, OrderDepth, TradingState
 from trader import Trader
 
-GALAXY = "GALAXY_SOUNDS_DARK_MATTER"
+GALAXY = "GALAXY_SOUNDS_BLACK_HOLES"
 SNACK = "SNACKPACK_RASPBERRY"
 SKIPPED = "SLEEP_POD_LAMB_WOOL"
+SKIPPED_NEW = "ROBOT_DISHES"
 UNKNOWN = "NOT_A_ROUND5_PRODUCT"
 
 
@@ -62,7 +63,16 @@ def test_skip_list_quiet():
     assert orders[SKIPPED] == []
 
 
-def test_default_does_not_flatten_at_close():
+def test_skip_list_includes_live_losers():
+    trader = Trader()
+    state = mkstate(SKIPPED_NEW, {9994: 13}, {10006: -13}, {SKIPPED_NEW: 0})
+
+    orders, _, _ = trader.run(state)
+
+    assert orders[SKIPPED_NEW] == []
+
+
+def test_default_flattens_at_close():
     trader = Trader()
     state = mkstate(
         GALAXY,
@@ -74,7 +84,7 @@ def test_default_does_not_flatten_at_close():
 
     orders, _, _ = trader.run(state)
 
-    assert quantities(orders[GALAXY]) == [(9995, 3), (10005, -5)]
+    assert quantities(orders[GALAXY]) == [(9994, -7)]
 
 
 def test_ignores_unknown_products():
@@ -186,7 +196,8 @@ def run_all():
         test_default_starter_quotes_inside_wide_book,
         test_default_respects_round5_position_limit,
         test_skip_list_quiet,
-        test_default_does_not_flatten_at_close,
+        test_skip_list_includes_live_losers,
+        test_default_flattens_at_close,
         test_ignores_unknown_products,
         test_inv_skew_pulls_quotes_down_when_long,
         test_inv_skew_pulls_quotes_up_when_short,

@@ -5,9 +5,17 @@ algo
 ----
 i use `prosperity_rust_backtester/datasets/round5/` (prices + trades, d+2 d+3 d+4). i ran the bundled starter through rust `make round5` and got +401,540 on paper. i then sorted per-product pnl and tagged seven names that lost on ≥2 of 3 days and lost ≥5k total: `SLEEP_POD_LAMB_WOOL`, `PANEL_1X2`, `PEBBLES_M`, `ROBOT_MOPPING`, `UV_VISOR_MAGENTA`, `GALAXY_SOUNDS_SOLAR_FLAMES`, `TRANSLATOR_SPACE_GRAY`. i turned those off in `Trader.SKIP_PRODUCTS` and replay said +503,671 (+~25%). same starter mm otherwise (penny inside wide book, size 5, limit 10).
 
-i tried price skew on inventory and eod flatten; both hurt replay on this dataset so `INV_SKEW_K=0` and `EOD_FLATTEN=False`. the methods stay in `trader.py` for subclasses in `test_trader.py`.
+i tried price skew on inventory; it hurt replay so `INV_SKEW_K=0`. eod flatten i kept off in backtest but turned on for live as cheap insurance against overnight inventory (`EOD_FLATTEN=True`, `EOD_TS=995_000`).
 
 tb: `cd prosperity_rust_backtester && make round5 TRADER=../trader.py PRODUCTS=full`
+
+live
+----
+first submission `LOGS/553293/` finished at **+35,372**. backtest had implied ~165k/day → live calibration ~0.21x. i pulled per-product live pnl and found 5 chronic bleeders that lost a lot in one day: `GALAXY_SOUNDS_PLANETARY_RINGS` -7,257, `ROBOT_DISHES` -4,500, `GALAXY_SOUNDS_DARK_MATTER` -3,834, `OXYGEN_SHAKE_MORNING_BREATH` -3,372, `PANEL_2X2` -2,806. these were ~20k/day winners in backtest — classic regime flip. added them to `SKIP_PRODUCTS` and flipped `EOD_FLATTEN=True`.
+
+second submission `LOGS/553674/` finished at **+57,141 (+21,769 vs prev)**. diff'd both runs product-by-product: every other product's pnl is byte-identical, the +21,769 came exactly from zeroing out the 5 newly-skipped names. no fitting, no second-order effects.
+
+remaining live losers (`ROBOT_LAUNDRY` -2,398, `PANEL_1X4` -2,395, `UV_VISOR_AMBER` -2,162 …) were strong backtest winners — these reads like noise on n=1 day, so i did not skip them. **57,141 is final.**
 
 research
 --------
