@@ -56,10 +56,15 @@ class Leg:
     expected_pnl: float
 
     def as_row(self) -> List[str]:
+        pct = self.allocation * 100
+        if abs(pct - round(pct)) < 1e-9:
+            alloc_s = f"{int(round(pct))}%"
+        else:
+            alloc_s = f"{pct:.2f}%"
         return [
             self.good,
             self.direction,
-            f"{self.allocation * 100:.2f}%",
+            alloc_s,
             f"{self.investment:,.0f}",
             f"{self.fee:,.0f}",
             f"{self.expected_pnl:,.0f}",
@@ -93,13 +98,89 @@ def optimal_allocations(
     return capped
 
 
+def _ev_int_pct(pct: int, r: float, budget: int = BUDGET) -> float:
+    if pct <= 0 or r <= 0:
+        return 0.0
+    a = pct / 100.0
+    return budget * (a * r - a * a)
+
+
+def integer_percent_allocations(
+    continuous: Dict[str, float],
+    expected_returns: Dict[str, float],
+    max_allocation: float = DEFAULT_MAX_ALLOCATION,
+    sum_cap_pct: int = 100,
+    budget: int = BUDGET,
+) -> Dict[str, int]:
+    """Whole-number percentages for UI that rejects fractional % (e.g. no 12.5)."""
+    max_pct = int(round(max_allocation * 100))
+    target = min(
+        sum_cap_pct,
+        int(round(sum(continuous.get(g, 0.0) * 100 for g in GOODS))),
+    )
+    p: Dict[str, int] = {}
+    for g in GOODS:
+        a = continuous.get(g, 0.0)
+        pi = int(round(a * 100))
+        if expected_returns.get(g, 0.0) <= 0:
+            pi = 0
+        p[g] = max(0, min(max_pct, pi))
+
+    def marg_down(g: str) -> float:
+        if p[g] <= 0:
+            return float("-inf")
+        r = expected_returns.get(g, 0.0)
+        return _ev_int_pct(p[g], r, budget) - _ev_int_pct(p[g] - 1, r, budget)
+
+    def marg_up(g: str) -> float:
+        if p[g] >= max_pct:
+            return float("-inf")
+        r = expected_returns.get(g, 0.0)
+        if r <= 0:
+            return float("-inf")
+        return _ev_int_pct(p[g] + 1, r, budget) - _ev_int_pct(p[g], r, budget)
+
+    while sum(p.values()) > target:
+        candidates = [g for g in GOODS if p[g] > 0]
+        g_drop = min(candidates, key=lambda g: (marg_down(g), g))
+        p[g_drop] -= 1
+
+    while sum(p.values()) < target:
+        candidates = [g for g in GOODS if p[g] < max_pct and expected_returns.get(g, 0.0) > 0]
+        if not candidates:
+            break
+        g_add = max(candidates, key=lambda g: (marg_up(g), g))
+        p[g_add] += 1
+
+    for g in GOODS:
+        if expected_returns.get(g, 0.0) <= 0:
+            p[g] = 0
+    if sum(p.values()) > sum_cap_pct:
+        while sum(p.values()) > sum_cap_pct:
+            candidates = [x for x in GOODS if p[x] > 0]
+            if not candidates:
+                break
+            g_drop = min(candidates, key=lambda x: (marg_down(x), x))
+            p[g_drop] -= 1
+
+    return p
+
+
 def build_ticket(
     expected_returns: Dict[str, float],
     directions: Dict[str, str],
     max_allocation: float = DEFAULT_MAX_ALLOCATION,
     budget: int = BUDGET,
+    integer_ui: bool = False,
 ) -> List[Leg]:
-    allocations = optimal_allocations(expected_returns, max_allocation)
+    continuous = optimal_allocations(expected_returns, max_allocation)
+    if integer_ui:
+        p_int = integer_percent_allocations(
+            continuous, expected_returns, max_allocation, sum_cap_pct=100, budget=budget
+        )
+        allocations = {g: p_int[g] / 100.0 for g in GOODS}
+    else:
+        allocations = continuous
     legs: List[Leg] = []
     for good in GOODS:
         a = allocations.get(good, 0.0)
@@ -135,12 +216,14 @@ def render(legs: List[Leg]) -> str:
     total_fee = sum(leg.fee for leg in legs)
     total_pnl = sum(leg.expected_pnl for leg in legs)
     out.append(line(["-" * w for w in widths]))
+    tot_pct = total_inv / BUDGET * 100
+    tot_alloc_s = f"{int(round(tot_pct))}%" if abs(tot_pct - round(tot_pct)) < 1e-9 else f"{tot_pct:.2f}%"
     out.append(
         line(
             [
                 "TOTAL",
                 "",
-                f"{total_inv / BUDGET * 100:.2f}%",
+                tot_alloc_s,
                 f"{total_inv:,.0f}",
                 f"{total_fee:,.0f}",
                 f"{total_pnl:,.0f}",
@@ -176,7 +259,11 @@ def sensitivity(
 
 
 def main():
-    legs = build_ticket(PLACEHOLDER_RETURNS, PLACEHOLDER_DIRECTIONS)
+    print("IGNITH UI: TYPE THE alloc COLUMN (whole %, see table) NOT r×100 (25, 30, …).")
+    print("25% in UI = r by mistake → 140% budget + fee blowup. cap is 100%.")
+    print("this game rejects fractional % (12.5 / 7.5) — ticket below uses integer %.")
+    print()
+    legs = build_ticket(PLACEHOLDER_RETURNS, PLACEHOLDER_DIRECTIONS, integer_ui=True)
     print(render(legs))
     print()
     print(sensitivity(PLACEHOLDER_RETURNS))

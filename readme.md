@@ -15,26 +15,24 @@ i wrote `analysis/round5_research.py` (stdlib) to dump family stats, pair list, 
 
 manual ignith
 -------------
-budget 1e6 xirec, fee per line i treat as `pct**2 * budget` (check the ui on one leg before lock — wiki text is messy).
+budget 1e6 xirec, fee per line `pct**2 * budget` where **pct** is the **Percentage** field as a fraction (0.125 not 0.25).
 
-i read ashflow alpha: buy obsidian (halt), sell pyroflex (tax doubles), buy thermalite (usage forecast), sell lava cake (recall), buy magma ink (launch queues), buy sulfur reactor (index 118 add). i skipped scoria (influencer hype), ashes (ambiguous pr), volcanic incense (pump narrative).
+**bug i almost shipped:** i typed **25, 30, 20…** in Percentage thinking that was `r×100`. that is **wrong** — the game treats that as **25% of budget** per line. optimal **allocation** is `a=r/2` in the model; the ui only takes **integer** percents, so i enter **12, 15, 10, 15, 8, 10** on the six legs (**70%** total), not **12.5 / 7.5**. typing **25,30,…** → **140%** and fee **345k** (matches the broken ticket).
 
-alloc comes from `a_i = r_i/2` with cap 0.4 and the lagrange step if Σa>1 — see `ignith_manual/pricer.py`. copy the table from `ignith_manual/run_output.txt` into the manual ui.
+i read ashflow alpha: buy obsidian, sell pyroflex, buy thermalite, sell lava cake, buy magma ink, buy sulfur; skip 3 hype legs.
 
-| good | side | % |
+| good | side | **% (ui)** |
 |---|---|---:|
-| obsidian_cutlery | buy | 12.5 |
-| pyroflex_cells | sell | 15.0 |
-| thermalite_core | buy | 10.0 |
-| lava_cake | sell | 15.0 |
-| magma_ink | buy | 7.5 |
-| scoria_paste | skip | 0 |
-| ashes_of_the_phoenix | skip | 0 |
-| volcanic_incense | skip | 0 |
-| sulfur_reactor | buy | 10.0 |
+| obsidian | buy | **12** |
+| pyroflex | sell | **15** |
+| thermalite | buy | **10** |
+| lava cake | sell | **15** |
+| magma ink | buy | **8** |
+| scoria / ashes / incense | skip | **0** |
+| sulfur | buy | **10** |
 | **sum** | | **70** |
 
-expected pnl on this model before rng: +86,250 after fees in the quadratic closed form.
+expected fee total **85,800** if ui matches `(pct/100)**2 * 1e6`. verify one line (e.g. 15% → fee 22,500). formula: `(pct/100)^2 * 1_000_000`.
 
 repo (what i kept)
 ------------------

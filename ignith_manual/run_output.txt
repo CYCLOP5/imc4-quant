@@ -1,16 +1,20 @@
-good                  direction  alloc   investment  fee     exp PnL
---------------------  ---------  ------  ----------  ------  -------
-obsidian_cutlery      buy        12.50%  125,000     15,625  15,625 
-pyroflex_cells        sell       15.00%  150,000     22,500  22,500 
-thermalite_core       buy        10.00%  100,000     10,000  10,000 
-lava_cake             sell       15.00%  150,000     22,500  22,500 
-magma_ink             buy        7.50%   75,000      5,625   5,625  
-scoria_paste          skip       0.00%   0           0       0      
-ashes_of_the_phoenix  skip       0.00%   0           0       0      
-volcanic_incense      skip       0.00%   0           0       0      
-sulfur_reactor        buy        10.00%  100,000     10,000  10,000 
---------------------  ---------  ------  ----------  ------  -------
-TOTAL                            70.00%  700,000     86,250  86,250 
+IGNITH UI: TYPE THE alloc COLUMN (whole %, see table) NOT r×100 (25, 30, …).
+25% in UI = r by mistake → 140% budget + fee blowup. cap is 100%.
+this game rejects fractional % (12.5 / 7.5) — ticket below uses integer %.
+
+good                  direction  alloc  investment  fee     exp PnL
+--------------------  ---------  -----  ----------  ------  -------
+obsidian_cutlery      buy        12%    120,000     14,400  15,600 
+pyroflex_cells        sell       15%    150,000     22,500  22,500 
+thermalite_core       buy        10%    100,000     10,000  10,000 
+lava_cake             sell       15%    150,000     22,500  22,500 
+magma_ink             buy        8%     80,000      6,400   5,600  
+scoria_paste          skip       0%     0           0       0      
+ashes_of_the_phoenix  skip       0%     0           0       0      
+volcanic_incense      skip       0%     0           0       0      
+sulfur_reactor        buy        10%    100,000     10,000  10,000 
+--------------------  ---------  -----  ----------  ------  -------
+TOTAL                            70%    700,000     85,800  86,200 
 
 good                  base r  +-0.05r ⇒ ΔEV  +-0.02r ⇒ ΔEV  ++0.00r ⇒ ΔEV  ++0.02r ⇒ ΔEV  ++0.05r ⇒ ΔEV
 obsidian_cutlery      0.250   -5,625         -2,400         +0             +2,600         +6,875       

@@ -59,6 +59,21 @@ def test_unconstrained_optimum_has_fee_equal_net_pnl():
         assert approx(by_good[good].fee, by_good[good].expected_pnl, 1e-6)
 
 
+def test_integer_ui_ticket_whole_percents_and_target_sum():
+    legs = pricer.build_ticket(
+        pricer.PLACEHOLDER_RETURNS,
+        pricer.PLACEHOLDER_DIRECTIONS,
+        integer_ui=True,
+    )
+    by_good = {leg.good: leg for leg in legs}
+    assert by_good["obsidian_cutlery"].allocation == 0.12
+    assert by_good["magma_ink"].allocation == 0.08
+    assert sum(round(leg.allocation * 100) for leg in legs) == 70
+    for leg in legs:
+        p = leg.allocation * 100
+        assert abs(p - round(p)) < 1e-9
+
+
 def test_skip_direction_when_return_or_alloc_is_zero():
     expected = {good: 0.0 for good in pricer.GOODS}
     expected["thermalite_core"] = 0.30
@@ -79,6 +94,7 @@ def run_all():
         test_per_leg_cap_clamps_extreme_returns,
         test_budget_constraint_binds_when_unconstrained_sum_over_one,
         test_unconstrained_optimum_has_fee_equal_net_pnl,
+        test_integer_ui_ticket_whole_percents_and_target_sum,
         test_skip_direction_when_return_or_alloc_is_zero,
     ]
     for test in tests:
