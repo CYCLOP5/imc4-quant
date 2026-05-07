@@ -1,3 +1,14 @@
+
+there are multiple branches corresponding to the numbered rounds:
+
+- `main` (demo)
+- `round1`
+- `round2`
+- `round3`
+- `round4`
+- `round5`
+
+---
 imc prosperity — tutorial / early sandbox
 ==========================================
 
