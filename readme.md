@@ -1,10 +1,14 @@
 <img width="1200" height="630" alt="image" src="https://github.com/user-attachments/assets/2478b149-cd4b-4eec-a96a-50c7453a6595" />
 <img width="1079" height="592" alt="image" src="https://github.com/user-attachments/assets/2306c3c3-4998-4f0f-8a9c-7863c896a214" />
+
+---
 Final results:
 - 762/18k+ Overall
 - 726 Algorithimic
 - 1225 Manual
 - 133 Country
+
+---
 there are multiple branches corresponding to the numbered rounds:
 
 - `main` (demo)
